@@ -1,32 +1,29 @@
-//require request and fs, variable for unquiried "baseUrl" url & user input
-const request = require("request");                                             
-const fs = require("fs");
-let baseUrl = `https://api.thecatapi.com/v1/breeds/search?q=`;
-const userInput = process.argv[2];
-//const fPath = process.argv[3];
 
-//function takes in user input of breed and call back to return data to access data
-//variable for url appends breedname onto quiry
-const breed = function (breedName, getBread) {
+const request = require("request");
+//const fs = require("fs");
+
+
+
+const breed = function(breedName, callBack) {                          //{1} function breed runs with param breed name that we get from first param on index (userInput --> breedName) and sec of callback that sends the error true or null, and description 
+  let baseUrl = `https://api.thecatapi.com/v1/breeds/search?q=`;
   const url = `${baseUrl}${breedName}`;
   //request url with function that calls errors, responses, and body
-  request(url, (error, response, body) => {
-    //parses the body array into a readable array containing and object
-    const data = JSON.parse(body);
+  request(url, (error, response, body) => {                                           //responce fullfilled , pending , rejected  gives an object ---promise request takes the url and returns anny error , response and body
+    
+    
     //check if there is an error through request param, or if there is no data
-    if (error || !data.length) {
-      console.log(`${breedName} not found!!!`);
-      return;
+    if (error || !body.length) {                                      //if error passes the error through call back of this functionton to breed on index
+      
+      return callBack(error, null);
+    
+    } else {
+      const data = JSON.parse(body);                                  //else does the things and send null error and the description through the call back {2--->}
+      const catData = data[0];
+      callBack(null, catData.description);
     }
-    //calls the getBread function with param of data object key to retrieve description
-    getBread(data[0].description);
+    
   });
 };
-//is called to get info out of the breed function
-const getBread = function (breed) {
-  console.log(breed);
-  return breed;
-};
 
-// Use the callback based approach we've been learning so far
-console.log(breed(userInput, getBread));
+
+module.exports = {breed};
